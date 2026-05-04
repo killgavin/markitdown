@@ -11,6 +11,7 @@ public sealed class MarkItDownConverter : IDisposable
 {
     private readonly List<(DocumentConverter Converter, double Priority)> _converters = [];
     private readonly HttpClient _httpClient;
+    private readonly bool _ownsHttpClient;
     private bool _disposed;
 
     // Priority constants (lower = tried first)
@@ -26,6 +27,7 @@ public sealed class MarkItDownConverter : IDisposable
     /// </param>
     public MarkItDownConverter(HttpClient? httpClient = null)
     {
+        _ownsHttpClient = httpClient is null;
         _httpClient = httpClient ?? new HttpClient();
 
         RegisterBuiltins();
@@ -201,7 +203,8 @@ public sealed class MarkItDownConverter : IDisposable
     {
         if (!_disposed)
         {
-            _httpClient.Dispose();
+            if (_ownsHttpClient)
+                _httpClient.Dispose();
             _disposed = true;
         }
     }
